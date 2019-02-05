@@ -3,8 +3,8 @@
   <dashboard-extension id="com.tableau.extensions.dashboard.tutorial.part.0" extension-version="0.1.0">
     <default-locale>en_US</default-locale>
     <name resource-id="name"/>
-    <description>Demonstrates getting the selected marks and responding to user input</description>
-    <author name="projectfrelard" email="projectfrelard@tableau.com" organization="tableau" website="https://www.tableau.com"/>
+    <description>This extension displays embedded videos and posts. </description>
+    <author name="Hayley Stevens" email="hayley.stevens@slalom.com" organization="Slalom" website="https://www.slalom.com"/>
     <min-api-version>0.6</min-api-version>
     <source-location>
       <url>https://hayleystevens.github.io/embedded-video/</url>
@@ -13,7 +13,7 @@
   </dashboard-extension>
   <resources>
     <resource id="name">
-      <text locale="en_US">Tutorial - Part 0</text>
+      <text locale="en_US">Embedded Videos</text>
     </resource>
   </resources>
 </manifest>
