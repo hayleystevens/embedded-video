@@ -9,7 +9,7 @@
    });
 
             function getUnderlyingData(){
-                sheet = viz.getWorkbook().getActiveSheet().getWorksheets().get("Storm Map Sheet");
+                sheet = viz.getWorkbook().getActiveSheet().getWorksheets().get(worksheetName);
 		 // If the active sheet is not a dashboard, then you can just enter:
 		 // viz.getWorkbook().getActiveSheet();
                 options = {
