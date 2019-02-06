@@ -7,12 +7,25 @@
     // Tell Tableau we'd like to initialize our extension
    });
 
+	// function called by viz on marks being selected in the workbook
+function onMarksSelection(marksEvent) {
+  return marksEvent.getMarksAsync().then(reportSelectedMarks);
+}
+
+function reportSelectedMarks(marks) {
+    for (var markIndex = 0; markIndex < marks.length; markIndex++) {
+        var pairs = marks[markIndex].getPairs();
+        for (var pairIndex = 0; pairIndex < pairs.length; pairIndex++) {
+            var pair = pairs[pairIndex];
+            pair.formattedValue;
+            }
+        }
+    }
+}
+
 	function listenToMarksSelection() {
             viz.addEventListener(tableau.TableauEventName.MARKS_SELECTION, onMarksSelection);
         }
 
-        function onMarksSelection(marksEvent) {
-            return marksEvent.getMarksAsync().then(reportSelectedMarks);
-        }
 
 )();
