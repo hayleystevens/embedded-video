@@ -8,16 +8,16 @@
     const worksheetName = URL_ID;
    });
 
-   tableau.extensions.dashboardContent.dashboard.worksheets.find(w => w.name ===worksheetName).getUnderlyingDataAsync().then(dataTable => {
-    let field = dataTable.columns.find(column => column.fieldName === "post_or_video_id");
-    let list = [];
-    for (let row of dataTable.data) {
-      list.push(row[field.index].value);
-    }
-    let values = list.filter((el, i, arr) => arr.indexOf(el) === i);
-    console.log(values)
-  });
-
+            function getUnderlyingData(){
+                sheet = viz.getWorkbook().getActiveSheet().getWorksheets().get("Storm Map Sheet");
+		 // If the active sheet is not a dashboard, then you can just enter:
+		 // viz.getWorkbook().getActiveSheet();
+                options = {
+                    maxRows: 10, // Max rows to return. Use 0 to return all rows
+                    ignoreAliases: false,
+                    ignoreSelection: true,
+                    includeAllColumns: false
+                };
     // Add an event listener for the selection changed event on this sheet.
     unregisterEventHandlerFunction = worksheet.addEventListener(tableau.TableauEventType.MarkSelectionChanged, function (selectionEvent) {
     });
