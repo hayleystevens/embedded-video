@@ -20,7 +20,26 @@
   </head>
     
   <body>
-<div id="data_table"></div>
+    <div class="container-fluid">
+      <!-- Main UI -->
+      <div id="selected_marks">
+        <h4>
+          Marks for <span class="sheet_name" id="selected_marks_title">Sheet Name</span>
+          <button title="Choose Sheet" type="button" class="btn btn-link" id="show_choose_sheet_button">
+            <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+          </button>
+          <button title="Reset Filters" type="button" class="btn btn-link" id="reset_filters_button">
+            <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span>
+          </button>
+        </h4>
+        <div id="data_table_wrapper"></div>
+        <div id="no_data_message">
+          <h5>No marks selected</h5>
+        </div>
+      </div>
+    </div>
+	  
+	  <!---->
   
     <!-- Load Facebook SDK for JavaScript -->
 <div id="fb-root"></div>
