@@ -9,8 +9,6 @@
       // Get the dashboard name from the tableau namespace and set it as our title
       const dashboardName = tableau.extensions.dashboardContent.dashboard.name;
       $('#choose_sheet_title').text(dashboardName);
-       const worksheetName = 'URL_ID';
- $('#title').text(worksheet.name);
     });
   });
 })();
