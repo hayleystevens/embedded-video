@@ -6,8 +6,15 @@
   $(document).ready(function () {
     // Tell Tableau we'd like to initialize our extension
     tableau.extensions.initializeAsync().then(function () {
-      // Once the extension is initialized, ask the user to choose a sheet
-      showChooseSheetDialog();
+      // Fetch the saved sheet name from settings. This will be undefined if there isn't one configured yet
+      const savedSheetName = tableau.extensions.settings.get('sheet');
+      if (savedSheetName) {
+        // We have a saved sheet name, show its selected marks
+        loadSelectedMarks(savedSheetName);
+      } else {
+        // If there isn't a sheet saved in settings, show the dialog
+        showChooseSheetDialog();
+      }
 
       initializeButtons();
     });
@@ -27,19 +34,22 @@
     // The first step in choosing a sheet will be asking Tableau what sheets are available
     const worksheets = tableau.extensions.dashboardContent.dashboard.worksheets;
 
-    // Next, we loop through all of these worksheets add add buttons for each one
+    // Next, we loop through all of these worksheets and add buttons for each one
     worksheets.forEach(function (worksheet) {
       // Declare our new button which contains the sheet name
       const button = createButton(worksheet.name);
 
       // Create an event handler for when this button is clicked
       button.click(function () {
-        // Get the worksheet name which was selected
+        // Get the worksheet name and save it to settings.
+        filteredColumns = [];
         const worksheetName = worksheet.name;
-
-        // Close the dialog and show the data table for this worksheet
-        $('#choose_sheet_dialog').modal('toggle');
-        loadSelectedMarks(worksheetName);
+        tableau.extensions.settings.set('sheet', worksheetName);
+        tableau.extensions.settings.saveAsync().then(function () {
+          // Once the save has completed, close the dialog and show the data table for this worksheet
+          $('#choose_sheet_dialog').modal('toggle');
+          loadSelectedMarks(worksheetName);
+        });
       });
 
       // Add our button to the list of worksheets to choose from
@@ -59,7 +69,15 @@
     return button;
   }
 
+  // This variable will save off the function we can call to unregister listening to marks-selected events
+  let unregisterEventHandlerFunction;
+
   function loadSelectedMarks (worksheetName) {
+    // Remove any existing event listeners
+    if (unregisterEventHandlerFunction) {
+      unregisterEventHandlerFunction();
+    }
+
     // Get the worksheet object we want to get the selected marks for
     const worksheet = getSelectedSheet(worksheetName);
 
@@ -87,10 +105,16 @@
       // Populate the data table with the rows and columns we just pulled out
       populateDataTable(data, columns);
     });
+
+    // Add an event listener for the selection changed event on this sheet.
+    unregisterEventHandlerFunction = worksheet.addEventListener(tableau.TableauEventType.MarkSelectionChanged, function (selectionEvent) {
+      // When the selection changes, reload the data
+      loadSelectedMarks(worksheetName);
+    });
   }
 
   function populateDataTable (data, columns) {
-    // Do some UI setup here to change the visible section and reinitialize the table
+    // Do some UI setup here: change the visible section and reinitialize the table
     $('#data_table_wrapper').empty();
 
     if (data.length > 0) {
@@ -101,6 +125,22 @@
       var top = $('#data_table_wrapper')[0].getBoundingClientRect().top;
       var height = $(document).height() - top - 130;
 
+      const headerCallback = function (thead, data) {
+        const headers = $(thead).find('th');
+        for (let i = 0; i < headers.length; i++) {
+          const header = $(headers[i]);
+          if (header.children().length === 0) {
+            const fieldName = header.text();
+            const button = $(`<a href='#'>${fieldName}</a>`);
+            button.click(function () {
+              filterByColumn(i, fieldName);
+            });
+
+            header.html(button);
+          }
+        }
+      };
+
       // Initialize our data table with what we just gathered
       $('#data_table').DataTable({
         data: data,
@@ -110,6 +150,7 @@
         scroller: true,
         scrollY: height,
         scrollX: true,
+        headerCallback: headerCallback,
         dom: "<'row'<'col-sm-6'i><'col-sm-6'f>><'row'<'col-sm-12'tr>>" // Do some custom styling
       });
     } else {
@@ -120,9 +161,40 @@
 
   function initializeButtons () {
     $('#show_choose_sheet_button').click(showChooseSheetDialog);
+    $('#reset_filters_button').click(resetFilters);
+  }
+
+  // Save the columns we've applied filters to so we can reset them
+  let filteredColumns = [];
+
+  function filterByColumn (columnIndex, fieldName) {
+    // Grab our column of data from the data table and filter out to just unique values
+    const dataTable = $('#data_table').DataTable({ retrieve: true });
+    const column = dataTable.column(columnIndex);
+    const columnDomain = column.data().toArray().filter(function (value, index, self) {
+      return self.indexOf(value) === index;
+    });
+
+    const worksheet = getSelectedSheet(tableau.extensions.settings.get('sheet'));
+    worksheet.applyFilterAsync(fieldName, columnDomain, tableau.FilterUpdateType.Replace);
+    filteredColumns.push(fieldName);
+    return false;
+  }
+
+  function resetFilters () {
+    const worksheet = getSelectedSheet(tableau.extensions.settings.get('sheet'));
+    filteredColumns.forEach(function (columnName) {
+      worksheet.clearFilterAsync(columnName);
+    });
+
+    filteredColumns = [];
   }
 
   function getSelectedSheet (worksheetName) {
+    if (!worksheetName) {
+      worksheetName = tableau.extensions.settings.get('sheet');
+    }
+
     // Go through all the worksheets in the dashboard and find the one we want
     return tableau.extensions.dashboardContent.dashboard.worksheets.find(function (sheet) {
       return sheet.name === worksheetName;
