@@ -17,10 +17,27 @@
     <!-- Include our own style sheets and javascript code -->
     <link rel="stylesheet" href="embedded-video/embedded-video.css">
     <script src="embedded-video/embedded-video.js"></script>
+    
   </head>
   <body>
+        <!-- Choose Sheet Dialog (See https://www.w3schools.com/bootstrap/bootstrap_modal.asp for bootstrap dialog info) -->
+    <div id="choose_sheet_dialog" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Choose a Sheet from <span class="sheet_name" id="choose_sheet_title"></span></h4>
+          </div>
+          <div class="modal-body">
+            <div id="choose_sheet_buttons"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <div class="container-fluid">
         <h4>Hello from <span class="sheet_name" id="choose_sheet_title"></span></h4>
     </div>
+    
   </body>
 </html>
